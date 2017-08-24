@@ -3,9 +3,14 @@ version: '3'
 services:
   db:
     image: postgres # DB image of postgres has a shortcut keywrod to get from docker hub
+    environment:
+      POSTGRES_DB: test_db5
+      POSTGRES_USER: test_5
+      POSTGRES_PASSWORD: 4eft7u9120p
   web:
+    restart: always
     build: . # Set the build context to be the wokring directory
-    command: bash -c "python manage.py makemigrations && python manage.py migrate && gunicorn composeexample.wsgi -b 0.0.0.0:8000"
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && python3 manage.py collectstatic --noinput && gunicorn composeexample.wsgi -b 0.0.0.0:8000 --reload"
     volumes:
       - .:/code # Set entire directroy to map as a volume to the code folder, so changes will be updated immediately wihtout doign a build
     expose:
@@ -19,5 +24,6 @@ services:
       - "8000:8000"
     volumes:
       - ./nginx:/etc/nginx/conf.d
+      - ./static:/static
     depends_on:
       - web
