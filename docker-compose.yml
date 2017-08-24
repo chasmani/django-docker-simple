@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  db:
+    image: postgres # DB image of postgres has a shortcut keywrod to get from docker hub
+  web:
+    build: . # Set the build context to be the wokring directory
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && gunicorn composeexample.wsgi -b 0.0.0.0:8000"
+    volumes:
+      - .:/code # Set entire directroy to map as a volume to the code folder, so changes will be updated immediately wihtout doign a build
+    expose:
+      - "8000" # Map port 8000 on the container to port 8000 on the machine running it
+    depends_on:
+      - db # docker-compose up will start db before this service
+  nginx:
+    image: nginx:latest
+    container_name: ng01
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+    depends_on:
+      - web
